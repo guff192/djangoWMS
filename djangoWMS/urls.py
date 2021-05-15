@@ -23,4 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('wms/', include('wms.urls')),
     path('', RedirectView.as_view(url='wms/', permanent=True)),
+    path('auth/', include("authapp.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
