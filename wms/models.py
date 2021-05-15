@@ -15,7 +15,7 @@ class Cell(models.Model):
 
 
 class StoragePlaces(models.Model):
-    cell_id = models.ForeignKey(Cell)
+    cell_id = models.ForeignKey(Cell, on_delete=models.CASCADE)
     type = models.CharField
     length = models.IntegerField
     width = models.IntegerField
@@ -30,7 +30,7 @@ class Bills(models.Model):
 
 
 class Goods(models.Model):
-    barcode = models.ForeignKey(GoodTypes)
+    barcode = models.ForeignKey(GoodTypes, on_delete=models.CASCADE)
     manufactured = models.DateField
     best_before = models.DateField
     BillsGoods = models.ManyToManyField(Bills)
