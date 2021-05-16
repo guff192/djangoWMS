@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Секция</title>
+</head>
+<body>
+    <h1>{{ cell }}</h1>
+    {% if cell.place_set.all %}
+        <ul>
+        {% for place in cell.place_set.all %}
+        <li>
+            {% if cell.row.storage != 'PAL' %}<a href="{% url 'place-detail' place.pk %}">Уровень {{ place.level }}</a>
+                ({{ place.goodinstance_set.all.count }} товар{{ place.goodinstance_set.all.count|pluralize:"ов" }})
+            {% else %}
+                <a href="{% url 'good-detail' place.goodinstance_set.all.0.good.pk %}">{{ place.goodinstance_set.all.0 }}</a>
+            {% endif %}
+        </li>
+        {% endfor %}
+        </ul>
+        {% else %}<p>Эта секция пуста</p>
+    {% endif %}
+</body>
+</html>

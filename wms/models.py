@@ -7,8 +7,8 @@ from django.urls import reverse
 class Row(models.Model):
     number = models.PositiveSmallIntegerField(help_text="Number of cell's row on a warehouse scheme", primary_key=True)
     STORAGE_TYPES = [
-        ('HRS', 'High Rack Storage'),
-        ('PAL', 'Pallet'),
+        ('HRS', 'Стеллаж'),
+        ('PAL', 'Палета'),
     ]
     storage = models.CharField(
         max_length=3,
@@ -18,7 +18,12 @@ class Row(models.Model):
     )
 
     def __str__(self):
-        return f"({dict(self.STORAGE_TYPES)[self.storage]}) Row {self.number}"
+        return f"{dict(self.STORAGE_TYPES)[self.storage]} Ряд {self.number}"
+
+
+
+    class Meta:
+        ordering = ['number']
 
 
 class Cell(models.Model):
@@ -26,10 +31,10 @@ class Cell(models.Model):
     section = models.PositiveSmallIntegerField('Section', help_text="Vertical section number on a warehouse scheme")
 
     def __str__(self):
-        return f'{self.row}, Section {self.section}'
+        return f'{self.row}, Секция {self.section}'
 
     def get_absolute_url(self):
-        return reverse('cell-details', args=[str(self.id)])
+        return reverse('cell-detail', args=[str(self.id)])
 
     class Meta:
         ordering = ['row', 'section']  # TODO: Choose ordering for table view
@@ -50,10 +55,13 @@ class Place(models.Model):
     )
 
     def __str__(self):
-        return f"{self.cell}, Level {self.level}"
+        if self.cell.row.storage == 'HRS':
+            return f"{self.cell}, Уровень {self.level}"
+        else:
+            return f"{self.cell}"
 
     def get_absolute_url(self):
-        return reverse('place-details', args=[str(self.id)])
+        return reverse('place-detail', args=[str(self.id)])
 
     class Meta:
         ordering = ['level']
@@ -93,7 +101,7 @@ class GoodInstance(models.Model):
     place = models.ForeignKey('Place', on_delete=models.RESTRICT, blank=True)
 
     def __str__(self):
-        return f"{self.good.article} ({self.id})"
+        return f"{self.id}: {self.good.article} ({self.place})"
 
 
 class Bill(models.Model):

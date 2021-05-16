@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Место</title>
+</head>
+<body>
+    <h1>{{ place }}</h1>
+    {% if place.goodinstance_set.all %}
+        <ul>
+        {% for good_instance in place.goodinstance_set.all %}
+        <li>
+            <a href="{% url 'good-detail' good_instance.good.pk %}">{{ good_instance }}</a>
+        </li>
+        {% endfor %}
+        </ul>
+        {% else %}<p>This section is empty.</p>
+    {% endif %}
+</body>
+</html>

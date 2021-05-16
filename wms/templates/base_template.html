@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% block title %}<title>Warehouse</title>{% endblock %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="header">
+        <ul class="nav">
+            <li class="menu-item"><a href="{% url 'index' %}">Warehouse map</a></li>
+            <li class="menu-item"><a href="{# TODO: add link href #}">Manage bills</a></li>
+        </ul>
+    </div>
+    <div class="main">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

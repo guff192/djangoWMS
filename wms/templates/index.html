@@ -1,0 +1,36 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+<div class="map-container">
+    <table class="map">
+        <thead>
+        <tr>
+            <th style="margin-right: 9px"></th>
+            {% for row in rows %}
+                <th class="row-num">{{ row.number }}</th>
+                <th class="space"></th>
+            {% endfor %}
+        </tr>
+        </thead>
+    {% for section, cells in section_cells.items %}
+        <tr>
+        <td class="cell-num">{{ section }}</td>
+        {% for cell in cells %}
+                <td
+class="{% if cell.row.storage == 'HRS' %}rack-empty{% elif cell.row.storage == 'PAL'%}pal-empty{% else %}space{% endif %}">
+
+                        {{ cell.row.number }} {{ cell.section }} <span class="hidden">{{ cell.id }}</span>
+                </td>
+            <td class="space"></td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+{#        TODO: Make this table look (at least) normal#}
+    </table>
+    <iframe class="cell-info" src="{% url 'cell-detail' 1 %}">
+    </iframe>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{% load static %}
+<script type="application/javascript" src="{% static 'js/script.js' %}"></script>
+{% endblock %}
