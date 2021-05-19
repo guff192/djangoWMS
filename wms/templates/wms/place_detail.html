@@ -1,20 +1,19 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Место</title>
-</head>
-<body>
-    <h1>{{ place }}</h1>
-    {% if place.goodinstance_set.all %}
-        <ul>
-        {% for good_instance in place.goodinstance_set.all %}
-        <li>
-            <a href="{% url 'good-detail' good_instance.good.pk %}">{{ good_instance }}</a>
-        </li>
-        {% endfor %}
-        </ul>
-        {% else %}<p>This section is empty.</p>
-    {% endif %}
-</body>
-</html>
+{% extends "base_template.html" %}
+
+{% block title %}
+<title>Место ({{ place.cell.row.number }}, {{ place.cell.section }}, {{ place.level }})</title>
+{% endblock %}
+
+{% block content %}
+<h1 class="info-title"><a href="{{ cell.get_absolute_url }}" target="_blank" >{{ place }}</a></h1>
+{% if place.goodinstance_set.all %}
+    <ul class="info-list">
+    {% for good_instance in place.goodinstance_set.all %}
+    <li>
+        <a href="{% url 'goodinstance-detail' good_instance.pk %}">{{ good_instance }}</a>
+    </li>
+    {% endfor %}
+    </ul>
+    {% else %}<p class="empty-text">На этом месте ничего не лежит.</p>
+{% endif %}
+{% endblock %}

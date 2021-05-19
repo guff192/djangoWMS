@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="map-container">
+    <div class="table-container">
     <table class="map">
         <thead>
         <tr>
@@ -13,24 +14,35 @@
         </tr>
         </thead>
     {% for section, cells in section_cells.items %}
-        <tr>
+        <tr class="map-row">
         <td class="cell-num">{{ section }}</td>
         {% for cell in cells %}
                 <td
-class="{% if cell.row.storage == 'HRS' %}rack-empty{% elif cell.row.storage == 'PAL'%}pal-empty{% else %}space{% endif %}">
+class="{% if cell.row.storage == 'HRS' %}
+            {% if cell.is_empty %}
+                rack-empty
+            {% else %}
+                rack
+            {% endif %}
+        {% elif cell.row.storage == 'PAL'%}
+            {% if cell.is_empty %}
+                pal-empty
+            {% else %}
+                pal
+            {% endif %}
+        {% else %}no-cell{% endif %}">
 
-                        {{ cell.row.number }} {{ cell.section }} <span class="hidden">{{ cell.id }}</span>
+                    {{ cell.row.number }} {{ cell.section }} <span class="hidden">{{ cell.cell_id }}</span>
                 </td>
             <td class="space"></td>
         {% endfor %}
         </tr>
     {% endfor %}
-{#        TODO: Make this table look (at least) normal#}
     </table>
-    <iframe class="cell-info" src="{% url 'cell-detail' 1 %}">
+    </div>
+    <iframe class="info-bar" id="info_bar" src="{% url 'cell-detail' 1 %}">
     </iframe>
 </div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 {% load static %}
 <script type="application/javascript" src="{% static 'js/script.js' %}"></script>
 {% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+<title>Накладные</title>
+{% endblock %}
+
+{% block content %}
+    {% if perms.wms.can_add_bill %}
+            <a class="info-title" href="{% url 'create-bill' %}">Создать накладную</a>
+    {% endif %}
+    {% if bill_list %}
+        <ul class="info-list">
+        {% for bill in bill_list %}
+            <li class="{% if bill.goodinstance_set.all %}in-stock{% else %}out-of-stock{% endif %} info-title">
+                <a href="{% url 'bill-detail' bill.pk %}">{{ bill }}</a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p class="empty-text">Накладных нет.</p>
+    {% endif %}
+{% endblock %}

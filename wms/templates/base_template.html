@@ -3,19 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {% block title %}<title>Warehouse</title>{% endblock %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    {% block title %}<title>Склад</title>{% endblock %}
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
     <div class="header">
+
         <ul class="nav">
-            <li class="menu-item"><a href="{% url 'index' %}">Warehouse map</a></li>
-            <li class="menu-item"><a href="{# TODO: add link href #}">Manage bills</a></li>
+            {% if user.is_authenticated %}
+                <li class="menu-item"><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
+                {% load user_tags %}
+                <li class="menu-item"><p>User: {{ user.get_username }} </p></li>
+                <li class="menu-item"><a href="{% url 'favorites'%}">Избранное</a></li>
+            {% else %}
+                <li class="menu-item"><a href="{% url 'login' %}?next={{request.path}}">Login</a></li>
+                <li class="menu-item"></li>
+                <li class="menu-item"></li>
+            {% endif %}
+            <li class="menu-item"><a href="{% url 'index' %}">Схема склада</a></li>
+            <li class="menu-item"><a href="{% url 'goods' %}">Каталог товаров</a></li>
+            {% if perms.wms.view_bill %}
+                <li class="menu-item"><a href="{% url 'bills' %}">Накладные</a></li>
+            {% endif %}
         </ul>
+
     </div>
-    <div class="main">
         {% block content %}{% endblock %}
-    </div>
 </body>
 </html>

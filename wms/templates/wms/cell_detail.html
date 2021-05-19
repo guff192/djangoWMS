@@ -1,24 +1,23 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Секция</title>
-</head>
-<body>
-    <h1>{{ cell }}</h1>
-    {% if cell.place_set.all %}
-        <ul>
-        {% for place in cell.place_set.all %}
-        <li>
-            {% if cell.row.storage != 'PAL' %}<a href="{% url 'place-detail' place.pk %}">Уровень {{ place.level }}</a>
-                ({{ place.goodinstance_set.all.count }} товар{{ place.goodinstance_set.all.count|pluralize:"ов" }})
-            {% else %}
-                <a href="{% url 'good-detail' place.goodinstance_set.all.0.good.pk %}">{{ place.goodinstance_set.all.0 }}</a>
-            {% endif %}
-        </li>
-        {% endfor %}
-        </ul>
-        {% else %}<p>Эта секция пуста</p>
-    {% endif %}
-</body>
-</html>
+{% extends "base_template.html" %}
+
+{% block title %}
+<title>Секция ({{ cell.row.number }}, {{ cell.section }})</title>
+{% endblock %}
+
+{% block content %}
+<h1 class="info-title"><a href="{{ cell.get_absolute_url }}" target="_blank" >{{ cell }}</a></h1>
+{% if cell.place_set.all and not cell.is_empty %}
+    <ul class="info-list">
+    {% for place in cell.place_set.all %}
+    <li>
+        {% if cell.row.storage != 'PAL' %}<a href="{% url 'place-detail' place.pk %}">Уровень {{ place.level }}</a>
+            ({{ place.goodinstance_set.all.count }} товар{{ place.goodinstance_set.all.count|pluralize:"ов" }})
+        {% else %}
+            <a href="{% url 'goodinstance-detail' place.goodinstance_set.all.0.pk %}">{{ place.goodinstance_set.all.0 }}</a>
+        {% endif %}
+    </li>
+    {% endfor %}
+    </ul>
+    {% else %}<p class="empty-text">Эта секция пуста</p>
+{% endif %}
+{% endblock %}

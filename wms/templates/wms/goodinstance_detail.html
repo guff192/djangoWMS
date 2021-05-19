@@ -1,0 +1,39 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+<h1 class="info-title"><a href="{{ goodinstance.good.get_absolute_url }}">{{ goodinstance.good }}</a></h1>
+<a class="info-title" href="{% url 'edit-goodinstance' goodinstance.pk %}">Редактировать товар</a>
+    {% if goodinstance.good not in user.good_set.all %}
+        <a class="info-title" href="{% url 'add-to-favorites' goodinstance.good.pk %}">Добавить в избранное</a>
+    {% else %}
+        <a class="info-title" href="{% url 'remove-from-favorites' goodinstance.good.pk %}">Удалить из избранного</a>
+    {% endif %}
+    <p class="good-description">{{ goodinstance.good.description }}</p>
+    <h3 class="good-description">{{ goodinstance.good.price }}р.</h3>
+    <h2 class="instances-header">Место на складе:</h2>
+    <div class="info-list">
+        {% if goodinstance.place %}
+            <a href="{% url 'place-detail' goodinstance.place.pk %}">{{ goodinstance.place }}</a>
+        {% else %}
+            <p class="empty-text">Для этого товара не определено место на складе.</p>
+        {% endif %}
+
+        {% if perms.wms.view_bill %}
+        <h2 class="instances-header">Накладные:</h2>
+        {% if goodinstance.bill.all %}
+            <ul class="info-list">
+
+            {% for bill in goodinstance.bill.all %}
+                <li class="in-stock info-title">
+                    <a href="{% url 'bill-detail' bill.pk %}">{{ bill }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        {% else %}
+            <p class="empty-text">Этот товар не привязан к накладным.</p>
+        {% endif %}
+    {% endif %}
+    </div>
+{% endblock %}
+

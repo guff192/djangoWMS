@@ -1,0 +1,24 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+<title>Избранное</title>
+{% endblock %}
+
+{% block content %}
+    <h1 class="info-title">Избранное</h1>
+
+    {% if good_list %}
+
+        <ul class="info-list">
+        {% for good in good_list %}
+            <li class="{% if good.goodinstance_set.all %}in-stock{% else %}out-of-stock{% endif %} info-title">
+                <a href="{% url 'good-detail' good.pk %}">{{ good }}</a>
+                <a class="empty-text" href="{% url 'remove-from-favorites' good.pk %}">Удалить из избранного</a>
+            </li>
+        {% endfor %}
+        </ul>
+
+    {% else %}
+        <p class="empty-text">У вас нет избранных товаров.</p>
+    {% endif %}
+{% endblock %}

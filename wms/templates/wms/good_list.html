@@ -1,0 +1,36 @@
+{% extends "base_template.html" %}
+
+{% block title %}
+<title>Каталог товаров</title>
+{% endblock %}
+
+{% block content %}
+    <h1 class="info-title">Товары</h1>
+    <form method="get" action="{% url 'goods' %}">
+    <table>
+        <tr>
+            <td><p>Производитель:</p></td>
+            <td><input type="text" value={{filter}} name="filter"/></td>
+        </tr>
+        <tr>
+            <td><p>Сортировать по:</p></td>
+            <td> <input type="text" value={{orderby}} name="orderby"/></td>
+        </tr>
+        <tr>
+            <td><p><input type="submit" name="submit" value="submit"/></p></td>
+        </tr>
+    </table>
+    </form>
+
+    {% if good_list %}
+        <ul class="info-list">
+        {% for good in good_list %}
+            <li class="{% if good.goodinstance_set.all %}in-stock{% else %}out-of-stock{% endif %} info-title">
+                <a href="{% url 'good-detail' good.pk %}">{{ good }}</a>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p class="empty-text">На складе нет этого товара.</p>
+    {% endif %}
+{% endblock %}

@@ -5,7 +5,7 @@ from .models import *
 
 @admin.register(GoodInstance)
 class GoodInstanceAdmin(admin.ModelAdmin):
-    list_display = ('good', 'place')
+    list_display = ('good', 'place', )
     list_filter = ('good', ('place__cell', admin.RelatedOnlyFieldListFilter), 'place__level', 'bill')
 
 
@@ -14,12 +14,22 @@ class GoodInstanceInline(admin.TabularInline):
     extra = 0
 
 
+class GoodFavoritesInline(admin.TabularInline):
+    model = Good.favorites.through
+    extra = 0
+
+
 @admin.register(Good)
 class GoodAdmin(admin.ModelAdmin):
     list_filter = ('manufacturer', 'model', 'fragile')
     inlines = [
         GoodInstanceInline,
+        GoodFavoritesInline,
     ]
+
+
+class GoodinstanceBillsInline(admin.TabularInline):
+    model = GoodInstance.bill.through
 
 
 @admin.register(Bill)
@@ -27,7 +37,7 @@ class BillAdmin(admin.ModelAdmin):
     list_display = ('number', 'date', 'operation')
     list_filter = ('operation',)
     inlines = [
-        GoodInstanceInline,
+        GoodinstanceBillsInline,
     ]
 
 

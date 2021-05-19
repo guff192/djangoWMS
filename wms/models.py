@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.contrib.auth.models import User
 
 # Create your models here.
 
@@ -20,27 +21,34 @@ class Row(models.Model):
     def __str__(self):
         return f"{dict(self.STORAGE_TYPES)[self.storage]} Ряд {self.number}"
 
-
-
     class Meta:
         ordering = ['number']
 
 
 class Cell(models.Model):
+    cell_id = models.AutoField(primary_key=True)
     row = models.ForeignKey(Row, on_delete=models.CASCADE)
     section = models.PositiveSmallIntegerField('Section', help_text="Vertical section number on a warehouse scheme")
+
+    @property
+    def is_empty(self):
+        for place in self.place_set.all():
+            if place.goodinstance_set.all():
+                return False
+        return True
 
     def __str__(self):
         return f'{self.row}, Секция {self.section}'
 
     def get_absolute_url(self):
-        return reverse('cell-detail', args=[str(self.id)])
+        return reverse('cell-detail', args=[str(self.cell_id)])
 
     class Meta:
-        ordering = ['row', 'section']  # TODO: Choose ordering for table view
+        ordering = ['row', 'section']
 
 
 class Place(models.Model):
+    place_id = models.AutoField(primary_key=True)
     cell = models.ForeignKey(Cell, on_delete=models.RESTRICT)
     level = models.PositiveSmallIntegerField(help_text="Level of the place", default=0)
 
@@ -61,15 +69,16 @@ class Place(models.Model):
             return f"{self.cell}"
 
     def get_absolute_url(self):
-        return reverse('place-detail', args=[str(self.id)])
+        return reverse('place-detail', args=[str(self.place_id)])
 
     class Meta:
         ordering = ['level']
 
 
 class Good(models.Model):
+    good_id = models.AutoField(primary_key=True)
     barcode = models.CharField(max_length=128, null=True, help_text="Product barcode")
-    article = models.CharField(max_length=128, blank=True, help_text="Name of product")
+    article = models.CharField(max_length=128, blank=True, help_text="Name of product", unique=True)
     description = models.TextField(max_length=1000, help_text="Description of product")
     manufacturer = models.CharField(max_length=128, blank=True, help_text="Manufacturer name (e.g. BOSCH, Samsung)")
     model = models.CharField('Model', max_length=128, blank=True, help_text="Model of the product")
@@ -86,22 +95,28 @@ class Good(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, help_text="Price of a good (in rubles)")
     fragile = models.BooleanField(default=False)
 
+    favorites = models.ManyToManyField(User, blank=True)
+
     def __str__(self):
         return self.article
 
     def get_absolute_url(self):
-        return reverse('good-detail', args=[str(self.id)])
+        return reverse('good-detail', args=[str(self.good_id)])
 
 
 class GoodInstance(models.Model):
+    goodinstance_id = models.AutoField(primary_key=True)
     good = models.ForeignKey(Good, on_delete=models.PROTECT)
-    manufactured = models.DateField(null=True)
-    best_before = models.DateField('Best before', null=True, blank=True)
-    bill = models.ForeignKey('Bill', on_delete=models.SET_NULL, null=True, blank=True)
-    place = models.ForeignKey('Place', on_delete=models.RESTRICT, blank=True)
+    manufactured = models.DateField(null=True, help_text="DD.MM.YYYY")
+    best_before = models.DateField('Best before', null=True, blank=True, help_text="DD.MM.YYYY")
+    bill = models.ManyToManyField('Bill', blank=True)
+    place = models.ForeignKey('Place', on_delete=models.RESTRICT, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.id}: {self.good.article} ({self.place})"
+        return f"{self.goodinstance_id}: {self.good.article} ({self.place})"
+
+    def get_absolute_url(self):
+        return reverse('goodinstance-detail', args=[str(self.goodinstance_id)])
 
 
 class Bill(models.Model):
@@ -118,10 +133,10 @@ class Bill(models.Model):
         help_text='Type of operation'
     )
 
-    date = models.DateField()
+    date = models.DateField(help_text="DD.MM.YYYY")
 
     def __str__(self):
-        return f"{self.number} ({self.date})"
+        return f"{dict(self.OPERATION_TYPES)[self.operation]} ({self.date})"
 
     def get_absolute_url(self):
         return reverse('bill-detail', args=[str(self.number)])

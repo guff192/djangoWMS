@@ -1,17 +1,22 @@
-let iframe = $("iframe")[0];
-let iframe_src = iframe.src.split('/');
-iframe_src.pop();
+if (location.pathname == "/wms/map/") {
+    let iframe = $("iframe#info_bar");
 
-iframe_src = iframe_src.join('/') + '/';
-
-let cells = $(".rack-empty, .pal-empty");
-cells.each(function () {
-    $(this).click(function () {
-        let message = $(this).find("span.hidden").text();
-        iframe.src = iframe_src + message;
-        iframe.src = iframe.src;
+    let iframe_src = iframe[0].src.split("/");
+    iframe_src.pop();
+    iframe_src = iframe_src.join("/") + "/";
+    
+    iframe[0].addEventListener("load", function () {
+        iframe.contents().find(".header").addClass("hidden");
     });
-});
 
-// cells.each(change)
+    $(".rack, .pal, .rack-empty, .pal-empty").each(function () {
+        $(this).click(function () {
+            let message = $(this).find("span.hidden").text();
+            iframe[0].src = iframe_src + message;
+            
+            $("iframe").contents().find(".header").css("display", "none");
+        });
+    });
+}
+
     
