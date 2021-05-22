@@ -15,14 +15,16 @@
     <p class="good-description">{{ good.description }}</p>
     <h3 class="good-description">{{ good.price }}р.</h3>
     <br>
-    <p class="good-description">(Сумма всех продаж: {{ good.total_sales_sum }})</p>
-    <h2 class="instances-header">На складе:</h2>
-    <ul class="info-list">
-    {% for good_instance in good.goodinstance_set.all %}
-    <li>
-        <a href="{% url 'goodinstance-detail' good_instance.pk %}">{{ good_instance }}</a>
-    </li>
-    {% endfor %}
+    {% if perms.wms.view_bill %}
+        <p class="good-description">(Сумма всех продаж: {{ good.total_sales_sum }})</p>
+        <h2 class="instances-header">На складе:</h2>
+        <ul class="info-list">
+        {% for good_instance in good.goodinstance_set.all %}
+        <li>
+            <a href="{% url 'goodinstance-detail' good_instance.pk %}">{{ good_instance }}</a>
+        </li>
+        {% endfor %}
+    {% endif %}
     </ul>
     {% else %}<p class="empty-text">На складе нет этого товара.</p>
 {% endif %}

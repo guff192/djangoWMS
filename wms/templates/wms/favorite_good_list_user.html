@@ -14,7 +14,11 @@
             <li class="{% if good.goodinstance_set.all %}in-stock{% else %}out-of-stock{% endif %} info-title">
                 <a href="{% url 'good-detail' good.pk %}">{{ good }}</a>
             </li>
+
             <a class="remove-link" href="{% url 'remove-from-favorites' good.pk %}">Удалить из избранного</a>
+            {% if user.groups.all.0.name == 'Клиенты' %}
+                <a class="info-title" href="{% url 'add-to-cart' bill.pk good.pk %}">Добавить в корзину</a>
+            {% endif %}
         {% endfor %}
         </ul>
 

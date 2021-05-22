@@ -132,9 +132,9 @@ class Bill(models.Model):
     number = models.PositiveSmallIntegerField(help_text='Number of the bill', primary_key=True)
 
     OPERATION_TYPES = [
-        ('arr', 'Arrival'),
-        ('dep', 'Departure'),
-        ('ord', 'Order'),
+        ('arr', 'Поставка'),
+        ('dep', 'Разгрузка'),
+        ('ord', 'Заказ'),
     ]
     operation = models.CharField(
         max_length=3,
@@ -146,7 +146,10 @@ class Bill(models.Model):
     date = models.DateField(help_text="DD.MM.YYYY", blank=True, null=True)
 
     def __str__(self):
-        return f"{dict(self.OPERATION_TYPES)[self.operation]} ({self.date})"
+        if self.date:
+            return f"{dict(self.OPERATION_TYPES)[self.operation]} ({self.date})"
+
+        return f"{dict(self.OPERATION_TYPES)[self.operation]}"
 
     def get_absolute_url(self):
         return reverse('bill-detail', args=[str(self.number)])

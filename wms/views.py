@@ -74,6 +74,18 @@ class GoodListView(generic.ListView):
         context = super(GoodListView, self).get_context_data(**kwargs)
         context['filter'] = self.request.GET.get('filter', )
         context['orderby'] = self.request.GET.get('orderby', 'price')
+
+        user_cart = self.request.session.get('cart_number', False)
+        if not user_cart:
+            number = int(''.join(str(time.time()).split('.')))
+            bill = Bill(number=number, operation='ord')
+            bill.save()
+            user_cart = bill
+            self.request.session['cart_number'] = user_cart.number
+        else:
+            bill = Bill.objects.get(number__exact=user_cart)
+
+        context['bill'] = bill
         return context
 
 
@@ -85,6 +97,22 @@ class FavoriteGoodsByUserListView(LoginRequiredMixin, generic.ListView):
     model = Good
     template_name = 'wms/favorite_good_list_user.html'
     paginate_by = 10
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(FavoriteGoodsByUserListView, self).get_context_data()
+        user_cart = self.request.session.get('cart_number', False)
+        if not user_cart:
+            number = int(''.join(str(time.time()).split('.')))
+            bill = Bill(number=number, operation='ord')
+            bill.save()
+            user_cart = bill
+            self.request.session['cart_number'] = user_cart.number
+        else:
+            bill = Bill.objects.get(number__exact=user_cart)
+        context['bill'] = bill
+
+        return context
+
 
     def get_queryset(self):
         return Good.objects.filter(favorites=self.request.user).order_by('article')
@@ -141,9 +169,19 @@ class BillCreate(PermissionRequiredMixin, CreateView):
         return HttpResponseRedirect(reverse('index'))
 
 
+class BillEditForm(forms.ModelForm):
+    class Meta:
+        model = Bill
+        fields = ('number', 'operation', 'date')
+
+    number = forms.NumberInput()
+    operation = forms.ChoiceField(choices=Bill.OPERATION_TYPES)
+    date = forms.DateField(widget=forms.SelectDateWidget)
+
+
 class BillEdit(PermissionRequiredMixin, UpdateView):
     model = Bill
-    fields = '__all__'
+    form_class = BillEditForm
     permission_required = 'wms.change_bill'
 
     def handle_no_permission(self):
@@ -192,6 +230,7 @@ class AddGoodForm(forms.ModelForm):
         raise ValidationError('Этого товара нет в наличии')
 
 
+@login_required()
 def add_good_to_bill(request, bill_id):
     bill = get_object_or_404(Bill, number=bill_id)
 
@@ -221,9 +260,27 @@ def add_good_to_bill(request, bill_id):
 
 
 @login_required()
+def add_to_cart(request, bill_id, good_id):
+    bill = get_object_or_404(Bill, number=bill_id)
+    good = get_object_or_404(Good, good_id=good_id)
+
+    goodinstance_set = GoodInstance.objects \
+        .filter(good__exact=good)
+    for goodinstance in goodinstance_set:
+        if not goodinstance.bill.filter(operation__in=('dep', 'ord')):
+            bill.goodinstance_set.add(goodinstance)
+            if request.user.groups.filter(name__exact='Клиенты'):
+                return HttpResponseRedirect(reverse('cart'))
+            return HttpResponseRedirect(reverse('bill-detail', args=[str(bill.number)]))
+
+    return HttpResponseRedirect(reverse('goods'))
+
+
+
+
+@login_required()
 def cart(request):
     if request.user.groups.filter(name__exact='Клиенты'):
-        print('')
         user_cart = request.session.get('cart_number', False)
         if not user_cart:
             number = int(''.join(str(time.time()).split('.')))

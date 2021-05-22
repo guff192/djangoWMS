@@ -162,7 +162,7 @@ td {
     display: flex;
     justify-content: center;
     text-align: center;
-    margin: 15px 0;
+    margin: 5px 0;
     width: 100%;
 }
 
@@ -201,10 +201,11 @@ form th {
 
 .in-stock, .out-of-stock {
     display: flex;
+    flex-flow: column;
     justify-content: center;
     line-height: 30px;
     font-size: 20px;
-    margin: 10px 0;
+    margin: 20px 0;
 }
 .in-stock > a{
     color: green;

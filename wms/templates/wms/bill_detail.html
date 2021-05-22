@@ -6,7 +6,7 @@
 
 {% block content %}
     <h1 class="info-title">{{ bill }}</h1>
-    {% if perms.wms.can_change_bill %}
+    {% if perms.wms.change_bill %}
     <a class="info-title" href="{% url 'edit-bill' bill.pk %}">Изменить накладную</a>
     {% endif %}
     <a class="info-title" href="

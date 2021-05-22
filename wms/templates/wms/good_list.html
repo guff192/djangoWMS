@@ -7,6 +7,7 @@
 {% block content %}
     <h1 class="info-title">Товары</h1>
     <form method="get" action="{% url 'goods' %}">
+{#    TODO: Create form class for this#}
     <table>
         <tr>
             <td><p>Производитель:</p></td>
@@ -27,6 +28,16 @@
         {% for good in good_list %}
             <li class="{% if good.goodinstance_set.all %}in-stock{% else %}out-of-stock{% endif %} info-title">
                 <a href="{% url 'good-detail' good.pk %}">{{ good }}</a>
+
+                {% if good not in user.good_set.all %}
+                    <a class="info-title" href="{% url 'add-to-favorites' good.pk %}">Добавить в избранное</a>
+                {% else %}
+                    <a class="info-title" href="{% url 'remove-from-favorites' good.pk %}">Удалить из избранного</a>
+                {% endif %}
+
+                {% if user.groups.all.0.name == 'Клиенты' %}
+                    <a class="info-title" href="{% url 'add-to-cart' bill.pk good.pk %}">Добавить в корзину</a>{% endif %}
+
             </li>
         {% endfor %}
         </ul>
