@@ -6,8 +6,13 @@
 
 {% block content %}
     <h1 class="info-title">{{ bill }}</h1>
+    {% if perms.wms.can_change_bill %}
     <a class="info-title" href="{% url 'edit-bill' bill.pk %}">Изменить накладную</a>
-    <a class="info-title" href="{% url 'create-goodinstance' %}">Добавить товар</a>
+    {% endif %}
+    <a class="info-title" href="
+{% if bill.operation == 'arr' %} {% url 'create-goodinstance' %}
+{% else %}{% url 'add-good' bill.pk %}{% endif %}">
+        Добавить товар</a>
 {% if bill.goodinstance_set.all %}
     <ul class="info-list">
 

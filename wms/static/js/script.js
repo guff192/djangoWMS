@@ -13,6 +13,11 @@ if (location.pathname == "/wms/map/") {
         $(this).click(function () {
             let message = $(this).find("span.hidden").text();
             iframe[0].src = iframe_src + message;
+
+            $(".selected").each(function () {
+                this.classList.remove("selected");
+            })
+            this.classList.add("selected");
             
             $("iframe").contents().find(".header").css("display", "none");
         });

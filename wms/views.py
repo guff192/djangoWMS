@@ -6,6 +6,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponse
 from django.urls import reverse, reverse_lazy
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django import forms
+from django.core.exceptions import ValidationError
+import time
 
 from .models import Row, Cell, Place, Good, GoodInstance, Bill
 
@@ -35,7 +38,7 @@ def index(request):
         section_cells[section] = cells_list
 
     context = {'rows': rows, 'rows_count': rows_count,
-               'section_cells': section_cells, 'section_range': range(1, max_section + 1), }
+               'section_cells': section_cells, 'section_range': range(1, max_section + 1),}
 
     return render(request, 'map.html', context=context)
 
@@ -50,6 +53,9 @@ class PlaceDetailView(generic.DetailView):
 
 class GoodDetailView(generic.DetailView):
     model = Good
+
+    # def get_context_data(self, **kwargs):
+    #     context = super(GoodDetailView, self).
 
 
 class GoodListView(generic.ListView):
@@ -145,8 +151,6 @@ class BillEdit(PermissionRequiredMixin, UpdateView):
 
 
 def delete_good_from_bill(request, goodinstance_id, bill_id):
-    context = {}
-
     good_instance = get_object_or_404(GoodInstance, goodinstance_id=goodinstance_id)
     bill = get_object_or_404(Bill, number=bill_id)
 
@@ -156,13 +160,89 @@ def delete_good_from_bill(request, goodinstance_id, bill_id):
         for entry in set_to_del:
             bill.goodinstance_set.remove(entry)
 
+        if request.user.groups.filter(name__exact='Клиенты'):
+            return HttpResponseRedirect(reverse('cart'))
         return HttpResponseRedirect(reverse('bill-detail', args=[str(bill_id)]))
 
-    return render(request, "wms/goodinstance_confirm_delete.html", context)
+    return render(request, "wms/goodinstance_confirm_delete.html")
+
+
+class AddGoodForm(forms.ModelForm):
+    class Meta:
+        model = Good
+        fields = ('good_id',)
+
+    good_set = Good.objects.all()
+
+    good = forms.ModelChoiceField(
+        queryset=good_set,
+        empty_label=None,
+        to_field_name='good_id',
+        label='Товар:',
+    )
+
+    def clean_good(self):
+        data = self.cleaned_data['good']
+        for goodinstance in data.goodinstance_set.all():
+            print(f"{goodinstance}:")
+            if goodinstance.bill.all().filter(operation__in=('dep', 'ord')):
+                continue
+            return data
+
+        raise ValidationError('Этого товара нет в наличии')
+
+
+def add_good_to_bill(request, bill_id):
+    bill = get_object_or_404(Bill, number=bill_id)
+
+    if request.method == 'POST':
+        form = AddGoodForm(request.POST)
+        if form.is_valid():
+            good = form.cleaned_data['good']
+            goodinstance_set = GoodInstance.objects \
+                .filter(good__exact=good)
+            for goodinstance in goodinstance_set:
+                if not goodinstance.bill.filter(operation__in=('dep', 'ord')):
+                    bill.goodinstance_set.add(goodinstance)
+                    print(goodinstance)
+                    break
+            if request.user.groups.filter(name__exact='Клиенты'):
+                return HttpResponseRedirect(reverse('cart'))
+            return HttpResponseRedirect(reverse('bill-detail', args=[str(bill.number)]))
+
+    form = AddGoodForm(request.POST)
+    context = {
+        'bill_id': bill_id,
+        'form': form,
+        'bill': bill,
+    }
+
+    return render(request, 'wms/goodinstance_add_form.html', context)
+
+
+@login_required()
+def cart(request):
+    if request.user.groups.filter(name__exact='Клиенты'):
+        print('')
+        user_cart = request.session.get('cart_number', False)
+        if not user_cart:
+            number = int(''.join(str(time.time()).split('.')))
+            bill = Bill(number=number, operation='ord')
+            bill.save()
+            user_cart = bill
+            request.session['cart_number'] = user_cart.number
+        else:
+            bill = Bill.objects.get(number__exact=user_cart)
+
+        context = {'bill': bill}
+        return render(request, 'wms/bill_detail.html', context)
+
+    return HttpResponseRedirect(reverse('bills'))
 
 
 class GoodInstanceCreate(PermissionRequiredMixin, CreateView):
     model = GoodInstance
+    template_name = 'wms/goodinstance_create_form.html'
     fields = '__all__'
     permission_required = 'wms.change_good_instance'
 
@@ -172,6 +252,7 @@ class GoodInstanceCreate(PermissionRequiredMixin, CreateView):
 
 class GoodInstanceUpdate(PermissionRequiredMixin, UpdateView):
     model = GoodInstance
+    template_name = 'wms/goodinstance_create_form.html'
     fields = ['good', 'manufactured', 'best_before', 'bill', 'place']
     permission_required = 'wms.change_good_instance'
 

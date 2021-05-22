@@ -26,6 +26,8 @@
             <li class="menu-item"><a href="{% url 'goods' %}">Каталог товаров</a></li>
             {% if perms.wms.view_bill %}
                 <li class="menu-item"><a href="{% url 'bills' %}">Накладные</a></li>
+            {% elif request.user.is_authenticated %}
+                <li class="menu-item"><a href="{% url 'cart' %}">Корзина</a></li>
             {% endif %}
         </ul>
 

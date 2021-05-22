@@ -14,6 +14,8 @@
 {% if good.goodinstance_set.all %}
     <p class="good-description">{{ good.description }}</p>
     <h3 class="good-description">{{ good.price }}р.</h3>
+    <br>
+    <p class="good-description">(Сумма всех продаж: {{ good.total_sales_sum }})</p>
     <h2 class="instances-header">На складе:</h2>
     <ul class="info-list">
     {% for good_instance in good.goodinstance_set.all %}

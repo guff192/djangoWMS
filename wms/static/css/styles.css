@@ -111,9 +111,15 @@ td {
     cursor: pointer;
 }
 
+.selected {
+    box-shadow: 0px 3px 3px 5px rgba(24, 87, 168, 0.7);
+    z-index: 1;
+}
+
 .rack {
     background-color: #5a9544;
 }
+
 .pal {
     background-color: #d4c17e;
 }
@@ -131,7 +137,8 @@ td {
     border-bottom: none;
 }
 .space {
-    width: 20px;
+    width: 0px;
+    margin: 0 10px;
 }
 
 .hidden {
@@ -160,7 +167,7 @@ td {
 }
 
 .empty-text {
-    color: #aa4027;
+    color: #aa4027!important;
 }
 
 .info-list {
@@ -193,7 +200,8 @@ form th {
 }
 
 .in-stock, .out-of-stock {
-    display: block;
+    display: flex;
+    justify-content: center;
     line-height: 30px;
     font-size: 20px;
     margin: 10px 0;
@@ -212,5 +220,12 @@ form th {
     margin-top: -20px;
     margin-bottom: 10px;
     color: #0a085e;
+}
+
+.errorlist {
+    color: #0600b9;
+    list-style: none;
+    font-size: 20px;
+    margin-top: -26px;
 }
 

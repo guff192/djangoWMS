@@ -9,7 +9,7 @@ class Row(models.Model):
     number = models.PositiveSmallIntegerField(help_text="Number of cell's row on a warehouse scheme", primary_key=True)
     STORAGE_TYPES = [
         ('HRS', 'Стеллаж'),
-        ('PAL', 'Палета'),
+        ('PAL', 'Паллета'),
     ]
     storage = models.CharField(
         max_length=3,
@@ -97,6 +97,15 @@ class Good(models.Model):
 
     favorites = models.ManyToManyField(User, blank=True)
 
+    def total_sales_sum(self):
+        goodinstance_count = self.goodinstance_set.filter(bill__operation__exact='dep').count()
+        print(self, goodinstance_count)
+        summ = goodinstance_count * self.price
+        return summ
+
+    class Meta:
+        ordering = ['article']
+
     def __str__(self):
         return self.article
 
@@ -107,7 +116,7 @@ class Good(models.Model):
 class GoodInstance(models.Model):
     goodinstance_id = models.AutoField(primary_key=True)
     good = models.ForeignKey(Good, on_delete=models.PROTECT)
-    manufactured = models.DateField(null=True, help_text="DD.MM.YYYY")
+    manufactured = models.DateField(null=True, blank=True, help_text="DD.MM.YYYY")
     best_before = models.DateField('Best before', null=True, blank=True, help_text="DD.MM.YYYY")
     bill = models.ManyToManyField('Bill', blank=True)
     place = models.ForeignKey('Place', on_delete=models.RESTRICT, blank=True, null=True)
@@ -125,6 +134,7 @@ class Bill(models.Model):
     OPERATION_TYPES = [
         ('arr', 'Arrival'),
         ('dep', 'Departure'),
+        ('ord', 'Order'),
     ]
     operation = models.CharField(
         max_length=3,
@@ -133,7 +143,7 @@ class Bill(models.Model):
         help_text='Type of operation'
     )
 
-    date = models.DateField(help_text="DD.MM.YYYY")
+    date = models.DateField(help_text="DD.MM.YYYY", blank=True, null=True)
 
     def __str__(self):
         return f"{dict(self.OPERATION_TYPES)[self.operation]} ({self.date})"

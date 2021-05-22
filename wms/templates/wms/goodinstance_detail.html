@@ -10,6 +10,11 @@
     {% endif %}
     <p class="good-description">{{ goodinstance.good.description }}</p>
     <h3 class="good-description">{{ goodinstance.good.price }}р.</h3>
+
+    <p class="good-description">Изг.: {{ goodinstance.manufactured }}</p>
+    {% if goodinstance.best_before %}
+    <p class="good-description">Годен до: {{ goodinstance.best_before }}</p>
+    {% endif %}
     <h2 class="instances-header">Место на складе:</h2>
     <div class="info-list">
         {% if goodinstance.place %}

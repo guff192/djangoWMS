@@ -19,5 +19,7 @@ urlpatterns = [
     path('bills/<int:pk>', views.BillDetailView.as_view(), name='bill-detail'),
     path('bills/create/', views.BillCreate.as_view(), name='create-bill'),
     path('bills/<int:pk>/edit/', views.BillEdit.as_view(), name='edit-bill'),
+    path('bills/<int:bill_id>/add_goodinstance/', views.add_good_to_bill, name='add-good'),
     path('bills/<int:bill_id>/del_goodinstance/<int:goodinstance_id>', views.delete_good_from_bill, name='remove-good'),
+    path('cart/', views.cart, name='cart')
 ]
